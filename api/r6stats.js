@@ -1,9 +1,10 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Handle CORS preflight
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
 
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing platform or username" });
   }
 
-  const API_KEY = process.env.TRN_API_KEY; // Stored securely in Vercel env vars
+  const API_KEY = process.env.TRN_API_KEY;
 
   if (!API_KEY) {
     return res.status(500).json({ error: "API key not configured on server" });
@@ -30,9 +31,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Cache-Control", "s-maxage=120"); // Cache for 2 minutes
+    res.setHeader("Cache-Control", "s-maxage=120");
     return res.status(response.status).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
